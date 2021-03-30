@@ -108,12 +108,12 @@ namespace LauncherCaravansary
                     _mainAppLocationDir = locationArg;
                 }
 
-                if (File.Exists(appdataAppPath))
-                {
+                //if (File.Exists(appdataAppPath))
+                //{
                     _mainAppLocationDir = Directory.GetParent(appdataAppPath).FullName;
-                }
+                //}
 
-                _mainAppLocationDir = @".\";
+                //_mainAppLocationDir = @".\";
             }
 
 
@@ -158,11 +158,10 @@ namespace LauncherCaravansary
             this.topLabel.Text = "Launching caravansary...";
 
             //debug label
-            args.Add("RequstedUpdate");
+            //args.Add("RequstedUpdate");
 
             if (args.Contains("RequstedUpdate"))
             {
-
                 bool res = await UpdateMainApp();
                 if (!res) return;
 
@@ -196,6 +195,45 @@ namespace LauncherCaravansary
 
         }
 
+        private async Task<bool> UpdateMainApp()
+        {
+            this.ShowInTaskbar = true;
+            this.WindowState = FormWindowState.Normal;
+            UpdateLabelText(progressText, "Updating Caravansary...");
+
+
+            bool deleteSuccess = await Task.Run(() => DeleteMainApplication());
+            if (!deleteSuccess)
+            {
+                this.progressText.Text = "Couldn't delate app";
+                retryButton.Visible = true;
+                closeButton.Visible = true;
+                return false;
+            }
+
+            bool downloadSuccess = await Task.Run(() => DownloadNewVersion());
+            if (!downloadSuccess)
+            {
+                this.progressText.Text = "Couldn't download app";
+                retryButton.Visible = true;
+                closeButton.Visible = true;
+                return false;
+            }
+
+            bool extractSuccess = await Task.Run(() => ExtractZip());
+            if (!extractSuccess)
+            {
+                this.progressText.Text = "Couldn't extract app";
+                retryButton.Visible = true;
+                closeButton.Visible = true;
+                return false;
+            }
+
+            UpdateLabelText(progressText, "");
+            UpdateLabelText(topLabel, "Finished updating...");
+
+            return true;
+        }
 
         private bool DeleteMainApplication()
         {
@@ -307,45 +345,6 @@ namespace LauncherCaravansary
         }
 
 
-        private async Task<bool> UpdateMainApp()
-        {
-            this.ShowInTaskbar = true;
-            this.WindowState = FormWindowState.Normal;
-            UpdateLabelText(progressText, "Updating Caravansary...");
-
-
-            bool deleteSuccess = await Task.Run(() => DeleteMainApplication());
-            if (!deleteSuccess)
-            {
-                this.progressText.Text = "Couldn't delate app";
-                retryButton.Visible = true;
-                closeButton.Visible = true;
-                return false;
-            }
-
-            bool downloadSuccess = await Task.Run(() => DownloadNewVersion());
-            if (!downloadSuccess)
-            {
-                this.progressText.Text = "Couldn't download app";
-                retryButton.Visible = true;
-                closeButton.Visible = true;
-                return false;
-            }
-
-            bool extractSuccess = await Task.Run(() => ExtractZip());
-            if (!extractSuccess)
-            {
-                this.progressText.Text = "Couldn't extract app";
-                retryButton.Visible = true;
-                closeButton.Visible = true;
-                return false;
-            }
-
-            UpdateLabelText(progressText, "");
-            UpdateLabelText(topLabel, "Finished updating...");
-
-            return true;
-        }
 
         private async void retryButton_Click(object sender, EventArgs e)
         {
