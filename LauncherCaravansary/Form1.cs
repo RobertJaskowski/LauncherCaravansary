@@ -106,7 +106,7 @@ namespace LauncherCaravansary
                 if (hasLocationArg)
                 {
                     _mainAppLocationDir = locationArg;
-                }
+                }else
 
                 //if (File.Exists(appdataAppPath))
                 //{
@@ -114,6 +114,14 @@ namespace LauncherCaravansary
                 //}
 
                 //_mainAppLocationDir = @".\";
+
+
+                FileAttributes attr = File.GetAttributes(_mainAppLocationDir);
+
+                if (!attr.HasFlag(FileAttributes.Directory))
+                {
+                    _mainAppLocationDir = Directory.GetParent(_mainAppLocationDir).FullName;
+                }
             }
 
 
@@ -159,6 +167,7 @@ namespace LauncherCaravansary
 
             //debug label
             //args.Add("RequstedUpdate");
+            //args.Add(@"C:\Users\Robert\Desktop\WORK\Caravansary\Caravansary\bin\Debug\x64\net5.0-windows\Caravansary.dll");
 
             if (args.Contains("RequstedUpdate"))
             {
